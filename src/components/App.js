@@ -1,22 +1,32 @@
 import {useState, useEffect} from "react";
-import Header from "./Header";
-import Main from "./Main";
-import Footer from "./Footer";
-import ImagePopup from "./ImagePopup";
+import Header from "./Main/Header";
+import Main from "./Main/Main";
+import Footer from "./Main/Footer";
+import ImagePopup from "./Popups/ImagePopup";
 import {api} from "../utils/Api";
 import {CurrentUserContext} from "../contexts/CurrentUserContext";
-import EditProfilePopup from "./EditProfilePopup";
-import EditAvatarPopup from "./EditAvatarPopup";
-import AddPlacePopup from "./AddPlacePopup";
-import ConfirmPopup from "./ConfirmPopup";
+import EditProfilePopup from "./Popups/EditProfilePopup";
+import EditAvatarPopup from "./Popups/EditAvatarPopup";
+import AddPlacePopup from "./Popups/AddPlacePopup";
+import ConfirmPopup from "./Popups/ConfirmPopup";
+import InfoTooltip from "./Auth/InfoTooltip";
+import successful from "../images/successful.svg";
+import unsuccessful from "../images/unsuccessful.svg";
+import Register from "./Auth/Register";
+import Login from "./Auth/Login";
 
 function App() {
-  const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
-  const [isAddPlacePopupOpen, setisAddPlacePopupOpen] = useState(false);
-  const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
-  const [isImagePopupOpen, setIsImagePopupOpen] = useState(false);
+  const [isEditProfilePopupOpen, setEditProfilePopupOpen] = useState(false);
+  const [isAddPlacePopupOpen, setAddPlacePopupOpen] = useState(false);
+  const [isEditAvatarPopupOpen, setEditAvatarPopupOpen] = useState(false);
+  const [isImagePopupOpen, setImagePopupOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
   const [сonfirmPopupOpen, setConfirmPopupOpen] = useState(null);
+  const [isInfoTooltip, setInfoTooltip] = useState(false);
+  const [infoTooltipProps, setInfoTooltipProps] = useState({
+    title: "",
+    img: "",
+  });
 
   const [currentUser, setCurrentUser] = useState({});
   const [cards, setCards] = useState([]);
@@ -35,29 +45,30 @@ function App() {
   }, []);
 
   function handleEditProfileClick() {
-    setIsEditProfilePopupOpen(true);
+    setEditProfilePopupOpen(true);
   }
 
   function handleAddPlaceClick() {
-    setisAddPlacePopupOpen(true);
+    setAddPlacePopupOpen(true);
   }
 
   function handleEditAvatarClick() {
-    setIsEditAvatarPopupOpen(true);
+    setEditAvatarPopupOpen(true);
   }
 
   function closeAllPopups() {
-    setIsEditProfilePopupOpen(false);
-    setisAddPlacePopupOpen(false);
-    setIsEditAvatarPopupOpen(false);
-    setIsImagePopupOpen(false);
+    setEditProfilePopupOpen(false);
+    setAddPlacePopupOpen(false);
+    setEditAvatarPopupOpen(false);
+    setImagePopupOpen(false);
     setSelectedCard(null);
     setConfirmPopupOpen(null);
+    setInfoTooltip(false);
   }
 
   function handleCardClick(card) {
     setSelectedCard(card);
-    setIsImagePopupOpen(true);
+    setImagePopupOpen(true);
   }
 
   function handleCardLike(card) {
@@ -163,6 +174,8 @@ function App() {
         onCardLike={handleCardLike}
         onCardRemove={handleCardRemoveClick}
       />
+      <Register isLoading={isLoading} isDarkMode={true} />
+      <Login isLoading={isLoading} isDarkMode={true} />
       <Footer />
 
       <EditProfilePopup
@@ -201,6 +214,13 @@ function App() {
         onClose={closeAllPopups}
         onCardRemove={handleCardRemove}
         isLoading={isLoading}
+      />
+
+      <InfoTooltip
+        onClose={closeAllPopups}
+        isOpen={isInfoTooltip}
+        onCloseByEscEndOverlay={closePopupByEscEndOverlay}
+        props={infoTooltipProps}
       />
     </CurrentUserContext.Provider>
   );
