@@ -1,0 +1,5 @@
+.header__auth {
+  display: flex;
+  max-height: 23px;
+  gap: 23px;
+}

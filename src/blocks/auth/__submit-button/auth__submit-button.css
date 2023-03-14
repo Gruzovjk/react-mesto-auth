@@ -1,0 +1,13 @@
+.auth__submit-button {
+  margin-top: 180px;
+  background-color: white;
+  color: black;
+}
+
+@media screen and (max-width: 650px) {
+  .auth__submit-button {
+    max-width: 260px;
+    margin-top: 140px;
+    min-height: 46px;
+  }
+}

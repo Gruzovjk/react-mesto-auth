@@ -1,6 +1,8 @@
 import {useEffect} from "react";
+import CloseButton from "../UI/CloseButton";
+import Form from "../UI/Form";
 
-function PopupWithForm({
+export default function PopupWithForm({
   title,
   name,
   children,
@@ -12,6 +14,7 @@ function PopupWithForm({
   buttonText,
   isValid,
   isLoading,
+  isDarkMode,
 }) {
   useEffect(() => {
     if (isOpen) {
@@ -26,32 +29,19 @@ function PopupWithForm({
   return (
     <div className={`popup popup_type_${name} ${isOpen && "popup_opened"}`}>
       <div className="popup__container">
-        <div className="popup__form">
-          <form
-            className="popup__set"
-            name={name}
-            onSubmit={onSubmit}
-            noValidate
-          >
-            <h2 className="popup__title">{title}</h2>
-            {children}
-            <button
-              type="submit"
-              className="popup__save-button"
-              disabled={!isValid}
-            >
-              {isLoading ? buttonLoadingText : buttonText}
-            </button>
-          </form>
-        </div>
-        <button
-          className="popup__close-button"
-          type="button"
-          onClick={onClose}
+        <Form
+          name={name}
+          title={title}
+          onSubmit={onSubmit}
+          buttonLoadingText={buttonLoadingText}
+          buttonText={buttonText}
+          isValid={isValid}
+          isLoading={isLoading}
+          isDarkMode={isDarkMode}
+          children={children}
         />
+        <CloseButton onClose={onClose} />
       </div>
     </div>
   );
 }
-
-export default PopupWithForm;
