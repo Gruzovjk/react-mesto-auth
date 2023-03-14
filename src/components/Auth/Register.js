@@ -2,10 +2,14 @@ import {useFormAndValidation} from "../../hooks/useFormAndValidation";
 import {useEffect} from "react";
 import AuthForm from "./AuthForm";
 
-export default function Register({isLoading, isDarkMode}) {
+export default function Register({isLoading, isDarkMode, onSubmit}) {
   const {values, handleChange, errors, isValid, resetForm} =
     useFormAndValidation();
 
+  function handleSubmit(e) {
+    e.preventDefault();
+    onSubmit(values.email, values.password);
+  }
   useEffect(() => {
     resetForm({}, {}, false);
   }, []);
@@ -19,10 +23,12 @@ export default function Register({isLoading, isDarkMode}) {
       isValid={isValid}
       isLoading={isLoading}
       isDarkMode={isDarkMode}
+      handleSubmit={handleSubmit}
       handleChange={handleChange}
       values={values}
       errors={errors}
-      span="Уже зарегистрированы? Войти"
+      span="Уже зарегистрированы?"
+      singin="Войти"
     />
   );
 }

@@ -14,6 +14,9 @@ import successful from "../images/successful.svg";
 import unsuccessful from "../images/unsuccessful.svg";
 import Register from "./Auth/Register";
 import Login from "./Auth/Login";
+import ProtectedRoute from "./Auth/ProtectedRoute";
+import {Routes, Route, Navigate, useNavigate} from "react-router-dom";
+import {signUp, signIn, checkToken} from "../utils/ApiAuth";
 
 function App() {
   const [isEditProfilePopupOpen, setEditProfilePopupOpen] = useState(false);
@@ -21,28 +24,101 @@ function App() {
   const [isEditAvatarPopupOpen, setEditAvatarPopupOpen] = useState(false);
   const [isImagePopupOpen, setImagePopupOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
-  const [сonfirmPopupOpen, setConfirmPopupOpen] = useState(null);
-  const [isInfoTooltip, setInfoTooltip] = useState(false);
-  const [infoTooltipProps, setInfoTooltipProps] = useState({
-    title: "",
-    img: "",
-  });
+  const [confirmPopupOpen, setConfirmPopupOpen] = useState(null);
 
   const [currentUser, setCurrentUser] = useState({});
   const [cards, setCards] = useState([]);
 
   const [isLoading, setLoading] = useState(false);
 
-  useEffect(() => {
-    Promise.all([api.getUserInfo(), api.getInitialCards()])
-      .then(([userData, cardList]) => {
-        setCurrentUser(userData);
-        setCards(cardList);
+  const [isInfoTooltip, setInfoTooltip] = useState(false);
+  const [infoTooltipProps, setInfoTooltipProps] = useState({
+    title: "",
+    img: "",
+  });
+  const [isLoggedIn, setLoggedIn] = useState(false);
+  const [email, setEmail] = useState(null);
+  const navigate = useNavigate();
+
+  function handleSignIn(email, password) {
+    setLoading(true);
+    signIn(email, password)
+      .then((res) => {
+        setLoggedIn(true);
+        setEmail(email);
+        localStorage.setItem("jwt", res.token);
+        navigate("/");
       })
-      .catch((err) =>
-        console.log(`При получении данных произошла ошибка: ${err}`)
-      );
+      .catch(() => {
+        setInfoTooltipProps({
+          title: "Что-то пошло не так! Попробуйте еще раз.",
+          img: unsuccessful,
+        });
+        setInfoTooltip(true);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }
+
+  function handleSignUp(email, password) {
+    setLoading(true);
+    signUp(email, password)
+      .then((res) => {
+        setInfoTooltipProps({
+          title: "Вы успешно зарегистрировались!",
+          img: successful,
+        });
+        navigate("/sign-in");
+      })
+      .catch(() => {
+        setInfoTooltipProps({
+          title: "Что-то пошло не так! Попробуйте еще раз.",
+          img: unsuccessful,
+        });
+      })
+      .finally(() => {
+        setInfoTooltip(true);
+        setLoading(false);
+      });
+  }
+
+  function handleLogOut() {
+    setLoggedIn(false);
+    setEmail(null);
+    localStorage.removeItem("jwt");
+    navigate("/sign-in");
+  }
+
+  useEffect(() => {
+    const jwt = localStorage.getItem("jwt");
+    if (jwt) {
+      checkToken(jwt)
+        .then((res) => {
+          if (res) {
+            setLoggedIn(true);
+            setEmail(res.data.email);
+            navigate("/");
+          }
+        })
+        .catch((err) => {
+          console.log(`При проверке токена произошла ошибка: ${err}`);
+        });
+    }
   }, []);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      Promise.all([api.getUserInfo(), api.getInitialCards()])
+        .then(([userData, cardList]) => {
+          setCurrentUser(userData);
+          setCards(cardList);
+        })
+        .catch((err) =>
+          console.log(`При получении данных произошла ошибка: ${err}`)
+        );
+    }
+  }, [isLoggedIn]);
 
   function handleEditProfileClick() {
     setEditProfilePopupOpen(true);
@@ -163,19 +239,71 @@ function App() {
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
-      <Header />
-      <Main
-        onEditProfile={handleEditProfileClick}
-        onAddPlace={handleAddPlaceClick}
-        onEditAvatar={handleEditAvatarClick}
-        onCardClick={handleCardClick}
-        cards={cards}
-        card={selectedCard}
-        onCardLike={handleCardLike}
-        onCardRemove={handleCardRemoveClick}
-      />
-      <Register isLoading={isLoading} isDarkMode={true} />
-      <Login isLoading={isLoading} isDarkMode={true} />
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <Header
+                title="Выйти"
+                isLoggedIn={isLoggedIn}
+                route=""
+                email={email}
+                onClick={handleLogOut}
+              />
+              <ProtectedRoute
+                onEditProfile={handleEditProfileClick}
+                onAddPlace={handleAddPlaceClick}
+                onEditAvatar={handleEditAvatarClick}
+                onCardClick={handleCardClick}
+                cards={cards}
+                card={selectedCard}
+                onCardLike={handleCardLike}
+                onCardRemove={handleCardRemoveClick}
+                component={Main}
+                isLoggedIn={isLoggedIn}
+              />
+            </>
+          }
+        />
+
+        <Route
+          path="/sign-up"
+          element={
+            <>
+              <Header title="Войти" route="/sign-in" />
+              <Register
+                isLoading={isLoading}
+                isDarkMode={true}
+                onSubmit={handleSignUp}
+              />
+            </>
+          }
+        />
+
+        <Route
+          path="/sign-in"
+          element={
+            <>
+              <Header title="Регистрация" route="/sign-up" />
+              <Login
+                isLoading={isLoading}
+                isDarkMode={true}
+                onSubmit={handleSignIn}
+              />
+            </>
+          }
+        />
+
+        <Route
+          exact
+          path="*"
+          element={
+            isLoggedIn ? <Navigate to="/" /> : <Navigate to="/sign-in" />
+          }
+        />
+      </Routes>
+
       <Footer />
 
       <EditProfilePopup
@@ -209,7 +337,7 @@ function App() {
       />
 
       <ConfirmPopup
-        card={сonfirmPopupOpen}
+        card={confirmPopupOpen}
         onCloseByEscEndOverlay={closePopupByEscEndOverlay}
         onClose={closeAllPopups}
         onCardRemove={handleCardRemove}

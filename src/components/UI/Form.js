@@ -3,7 +3,7 @@ import SubmitButton from "./SubmitButton";
 export default function Form({
   name,
   title,
-  onSubmit,
+  handleSubmit,
   buttonLoadingText,
   buttonText,
   isValid,
@@ -16,7 +16,7 @@ export default function Form({
       <form
         className={`popup__set ${isDarkMode && "auth__set"}`}
         name={name}
-        onSubmit={onSubmit}
+        onSubmit={handleSubmit}
         noValidate
       >
         <h2 className={`popup__title ${isDarkMode && "auth__title"}`}>

@@ -9,3 +9,9 @@
   text-align: center;
   color: white;
 }
+
+@media screen and (max-width: 650px) {
+  .auth__span {
+    max-width: 238px;
+  }
+}

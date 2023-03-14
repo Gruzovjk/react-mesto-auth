@@ -1,5 +1,6 @@
 import Form from "../UI/Form";
 import Input from "../UI/Input";
+import {Link} from "react-router-dom";
 
 export default function AuthForm({
   name,
@@ -13,6 +14,9 @@ export default function AuthForm({
   values,
   errors,
   span,
+  singin,
+  singup,
+  handleSubmit,
 }) {
   return (
     <div className="auth">
@@ -20,7 +24,7 @@ export default function AuthForm({
         <Form
           name={name}
           title={title}
-          // onSubmit={handleSubmit}
+          handleSubmit={handleSubmit}
           buttonLoadingText={buttonLoadingText}
           buttonText={buttonText}
           isValid={isValid}
@@ -52,7 +56,15 @@ export default function AuthForm({
             isValid={isValid}
           />
         </Form>
-        <p className="auth__span">{span}</p>
+        <p className="auth__span">
+          {span}{" "}
+          <Link to="/sign-in" className="auth__link">
+            {singin}
+          </Link>
+          <Link to="/sign-up" className="auth__link">
+            {singup}
+          </Link>
+        </p>
       </div>
     </div>
   );
